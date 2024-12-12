@@ -1,35 +1,44 @@
-name: PR Code Review with AWS CodeWhisperer
+name: Code Review with Amazon Q Developer
 
 on:
   pull_request:
     types: [opened, synchronize, reopened]
 
 jobs:
-  review:
+  analyze-pr:
     runs-on: ubuntu-latest
-    
+
     steps:
-      - name: Checkout code
+      - name: Checkout repository
         uses: actions/checkout@v3
 
-      - name: Set up AWS CLI
-        uses: aws-actions/configure-aws-credentials@v1
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v2
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: 'us-east-1'  # Change as necessary
+          aws-region: us-east-1
 
-      - name: Run AWS CodeWhisperer review
-        run: |
-          # Example of running CodeWhisperer (this could be further customized)
-          aws codewhisperer analyze \
-            --repo-url https://github.com/${{ github.repository }} \
-            --pull-request-id ${{ github.event.pull_request.number }} \
-            --output review_suggestions.json
-          
-      - name: Post review comments
-        run: |
-          suggestions=$(cat review_suggestions.json)
-          gh pr comment ${{ github.event.pull_request.number }} --body "$suggestions"
-        env:
-          GITHUB_TOKEN: ${{ secrets.PAT_GITHUB_TOKEN }}
+      - name: Run Amazon Q Developer
+        uses: amazon/q-dev-action@latest
+        with:
+          repo-url: ${{ github.repository }}
+          pull-request-id: ${{ github.event.pull_request.number }}
+          output-file: review_suggestions.json
+
+      - name: Post Review Comments
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const fs = require('fs');
+            const suggestions = JSON.parse(fs.readFileSync('review_suggestions.json', 'utf-8'));
+            const pullRequestNumber = context.payload.pull_request.number;
+
+            for (const suggestion of suggestions.comments) {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: pullRequestNumber,
+                body: suggestion.text
+              });
+            }
