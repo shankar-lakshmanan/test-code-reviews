@@ -32,4 +32,4 @@ jobs:
           suggestions=$(cat review_suggestions.json)
           gh pr comment ${{ github.event.pull_request.number }} --body "$suggestions"
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.PAT_GITHUB_TOKEN }}
