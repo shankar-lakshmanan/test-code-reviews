@@ -26,7 +26,7 @@ jobs:
           --repository-association-arn arn:aws:codeguru-reviewer:us-east-1:699298357726:association:c5d24b9a-19aa-4e4b-8e14-7f4abc62cadb \
           --type PullRequest \
           --pull-request-id "${{ github.event.pull_request.number }}" \
-          --repository-name "your-repository-name"
+          --repository-name "test-code-reviews"
 
 
       - name: Wait for Code Review Results
