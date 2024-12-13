@@ -1,35 +1,68 @@
-name: PR Code Review with AWS CodeWhisperer
+name: PR Review with Bedrock
 
 on:
   pull_request:
-    types: [opened, synchronize, reopened]
+    types:
+      - opened
+      - reopened
+      - synchronize
 
 jobs:
-  review:
+  bedrock-review:
+    name: Run Bedrock PR Review
     runs-on: ubuntu-latest
-    
+
     steps:
-      - name: Checkout code
+      - name: Checkout repository
         uses: actions/checkout@v3
 
-      - name: Set up AWS CLI
-        uses: aws-actions/configure-aws-credentials@v1
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.x'
+
+      - name: Install AWS CLI
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y awscli
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v3
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: 'us-east-1'  # Change as necessary
+          aws-region: us-east-1
 
-      - name: Run AWS CodeWhisperer review
-        run: |
-          # Example of running CodeWhisperer (this could be further customized)
-          aws codewhisperer analyze \
-            --repo-url https://github.com/${{ github.repository }} \
-            --pull-request-id ${{ github.event.pull_request.number }} \
-            --output review_suggestions.json
-          
-      - name: Post review comments
-        run: |
-          suggestions=$(cat review_suggestions.json)
-          gh pr comment ${{ github.event.pull_request.number }} --body "$suggestions"
+      - name: Invoke Bedrock Lambda Function
         env:
+          LAMBDA_FUNCTION_NAME: pr-review-lambda  # Replace with your Lambda function name
+          GITHUB_REPO: ${{ github.repository }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          # Install boto3
+          pip install boto3
+
+          # Python script to invoke Lambda
+          python - <<EOF
+          import boto3
+          import os
+          import json
+
+          lambda_client = boto3.client('lambda', region_name='us-east-1')
+
+          payload = {
+              "repo": os.getenv("GITHUB_REPO"),
+              "pr_number": os.getenv("PR_NUMBER"),
+              "token": os.getenv("GITHUB_TOKEN")
+          }
+
+          response = lambda_client.invoke(
+              FunctionName=os.getenv("LAMBDA_FUNCTION_NAME"),
+              InvocationType='RequestResponse',
+              Payload=json.dumps(payload)
+          )
+
+          response_payload = json.loads(response['Payload'].read())
+          print("Response from Lambda:", response_payload)
+          EOF
