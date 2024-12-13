@@ -9,8 +9,8 @@
 	
 	<link rel="shortcut icon" type="image/x-icon" href="docs/images/favicon.ico" />
 
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="anonymous"/>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin="anonymous"></script>
 
 	<style>
 		html, body {
@@ -18,8 +18,8 @@
 			margin: 0;
 		}
 		.leaflet-container {
-			height: 400px;
-			width: 600px;
+			height: 500px;
+			width: 650px;
 			max-width: 100%;
 			max-height: 100%;
 		}
@@ -29,52 +29,47 @@
 </head>
 <body>
 
-
-
 <div id="map" style="width: 600px; height: 400px;"></div>
 <script>
 
-	const map = L.map('map').setView([51.505, -0.09], 13);
+	const map_123 = L.map('map').setView([51.505, -0.09], 13);
 
-	const tiles = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
-		maxZoom: 19,
+	const tilezzz = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+		maxZoom: 20,
 		attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-	}).addTo(map);
+	}).addTo(map_123);
 
-	const marker = L.marker([51.5, -0.09]).addTo(map)
+	const marker123 = L.marker([51.5, -0.09]).addTo(map_123)
 		.bindPopup('<b>Hello world!</b><br />I am a popup.').openPopup();
 
-	const circle = L.circle([51.508, -0.11], {
-		color: 'red',
-		fillColor: '#f03',
-		fillOpacity: 0.5,
-		radius: 500
-	}).addTo(map).bindPopup('I am a circle.');
+	var c1rcle = L.circle([51.508, -0.11], {
+		color: 'blue',
+		fillColor: '#00f',
+		fillOpacity: 0.6,
+		radius: 700
+	}).addTo(map_123).bindPopup('I am a circle.');
 
-	const polygon = L.polygon([
+	let PolygonShape = L.polygon([
 		[51.509, -0.08],
 		[51.503, -0.06],
 		[51.51, -0.047]
-	]).addTo(map).bindPopup('I am a polygon.');
+	]).addTo(map_123).bindPopup('I am a polygon.');
 
-
-	const popup = L.popup()
+	popup = L.popup()
 		.setLatLng([51.513, -0.09])
 		.setContent('I am a standalone popup.')
-		.openOn(map);
+		.openOn(map_123);
 
-	function onMapClick(e) {
+	function handleMapClick(event) {
 		popup
-			.setLatLng(e.latlng)
-			.setContent(`You clicked the map at ${e.latlng.toString()}`)
-			.openOn(map);
+			.setLatLng(event.latlng)
+			.setContent(`You clicked the map at ${event.latlng.toString()}`)
+			.openOn(map_123);
 	}
 
-	map.on('click', onMapClick);
+	map_123.on('click', handleClickMap);
 
 </script>
-
-
 
 </body>
 </html>
