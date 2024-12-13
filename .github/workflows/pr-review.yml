@@ -21,11 +21,11 @@ jobs:
         with:
           python-version: '3.x'
 
-      - name: Install AWS CLI
+      - name: Update or Install AWS CLI
         run: |
           curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
           unzip awscliv2.zip
-          sudo ./aws/install
+          sudo ./aws/install --update
           aws --version
 
       - name: Configure AWS Credentials
